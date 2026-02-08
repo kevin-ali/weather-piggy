@@ -11,62 +11,42 @@
             min-height: 100vh;
             background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             color: #fff;
-            padding: 24px 20px 40px;
+            padding: 24px 20px 60px;
+            overflow-x: hidden;
         }
 
-        .wrap { max-width: 720px; margin: 0 auto; }
+        .wrap { max-width: 720px; margin: 0 auto; position: relative; z-index: 2; }
 
         /* --- Top bar --- */
-        .top-bar {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 28px;
-        }
+        .top-bar { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
         .top-logo {
-            text-decoration: none;
-            font-size: 36px;
-            line-height: 1;
-            flex-shrink: 0;
+            text-decoration: none; font-size: 36px; line-height: 1; flex-shrink: 0;
+            animation: piggy-wobble 3s ease-in-out infinite;
         }
-        .top-bar form {
-            flex: 1;
-            display: flex;
-            gap: 0;
+        @keyframes piggy-wobble {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
         }
+        .top-bar form { flex: 1; display: flex; gap: 0; }
         .top-bar input {
-            flex: 1;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 12px 0 0 12px;
-            font-size: 15px;
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-            outline: none;
+            flex: 1; padding: 12px 20px; border: none; border-radius: 12px 0 0 12px;
+            font-size: 15px; background: rgba(255,255,255,0.1); color: #fff; outline: none;
         }
         .top-bar input::placeholder { color: rgba(255,255,255,0.35); }
         .top-bar input:focus { background: rgba(255,255,255,0.16); }
         .top-bar button {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 0 12px 12px 0;
-            font-size: 15px;
-            font-weight: 600;
-            background: #e84393;
-            color: #fff;
-            cursor: pointer;
-            transition: background 0.2s;
+            padding: 12px 24px; border: none; border-radius: 0 12px 12px 0;
+            font-size: 15px; font-weight: 600; background: #e84393; color: #fff;
+            cursor: pointer; transition: background 0.2s;
         }
         .top-bar button:hover { background: #d63384; }
 
         /* --- Glass card --- */
         .card {
-            background: rgba(255,255,255,0.07);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 28px 32px;
-            margin-bottom: 18px;
+            background: rgba(255,255,255,0.07); backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;
+            padding: 28px 32px; margin-bottom: 18px;
         }
 
         /* --- Current weather --- */
@@ -78,26 +58,17 @@
         .current .temp span { font-size: 36px; vertical-align: super; color: rgba(255,255,255,0.5); }
         .current .desc { font-size: 18px; color: rgba(255,255,255,0.7); margin-top: 2px; }
         .piggy-says {
-            margin-top: 12px;
-            padding: 10px 20px;
-            background: rgba(232, 67, 147, 0.15);
-            border: 1px solid rgba(232, 67, 147, 0.25);
-            border-radius: 20px;
-            display: inline-block;
-            font-size: 14px;
-            color: #fd79a8;
-            font-style: italic;
+            margin-top: 12px; padding: 10px 20px;
+            background: rgba(232, 67, 147, 0.15); border: 1px solid rgba(232, 67, 147, 0.25);
+            border-radius: 20px; display: inline-block;
+            font-size: 14px; color: #fd79a8; font-style: italic;
         }
         .piggy-says::before { content: "🐷 "; }
 
         /* --- Stats grid --- */
         .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0;
-            margin-top: 24px;
-            padding-top: 24px;
-            border-top: 1px solid rgba(255,255,255,0.08);
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+            margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.08);
         }
         .stat { text-align: center; padding: 8px 0; }
         .stat-icon { font-size: 20px; margin-bottom: 4px; }
@@ -107,32 +78,21 @@
 
         /* --- Section titles --- */
         .section-title {
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: rgba(255,255,255,0.35);
-            margin-bottom: 16px;
-            font-weight: 600;
+            font-size: 13px; text-transform: uppercase; letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.35); margin-bottom: 16px; font-weight: 600;
         }
 
         /* --- Hourly --- */
         .hourly-scroll {
-            display: flex;
-            gap: 6px;
-            overflow-x: auto;
-            padding-bottom: 8px;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(255,255,255,0.15) transparent;
+            display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px;
+            scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent;
         }
         .hourly-scroll::-webkit-scrollbar { height: 4px; }
         .hourly-scroll::-webkit-scrollbar-track { background: transparent; }
         .hourly-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
         .hour-item {
-            flex: 0 0 72px;
-            text-align: center;
-            padding: 14px 6px;
-            border-radius: 14px;
-            background: rgba(255,255,255,0.03);
+            flex: 0 0 72px; text-align: center; padding: 14px 6px;
+            border-radius: 14px; background: rgba(255,255,255,0.03);
         }
         .hour-item:first-child { background: rgba(232, 67, 147, 0.2); }
         .hour-item .h-time { font-size: 11px; color: rgba(255,255,255,0.45); margin-bottom: 8px; }
@@ -143,9 +103,7 @@
 
         /* --- Daily --- */
         .day-row {
-            display: flex;
-            align-items: center;
-            padding: 12px 0;
+            display: flex; align-items: center; padding: 12px 0;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
         .day-row:last-child { border-bottom: none; }
@@ -160,69 +118,134 @@
         .d-max { font-weight: 600; }
         .d-min { color: rgba(255,255,255,0.35); }
         .d-bar-wrap {
-            width: 80px;
-            height: 4px;
-            background: rgba(255,255,255,0.06);
-            border-radius: 3px;
-            position: relative;
-            overflow: hidden;
+            width: 80px; height: 4px; background: rgba(255,255,255,0.06);
+            border-radius: 3px; position: relative; overflow: hidden;
         }
         .d-bar {
-            position: absolute;
-            top: 0;
-            height: 100%;
-            border-radius: 3px;
+            position: absolute; top: 0; height: 100%; border-radius: 3px;
             background: linear-gradient(90deg, #74b9ff, #fd79a8);
         }
 
         /* --- Sun card --- */
-        .sun-card {
-            display: flex;
-            justify-content: space-around;
-            text-align: center;
-        }
+        .sun-card { display: flex; justify-content: space-around; text-align: center; }
         .sun-item .sun-icon { font-size: 32px; margin-bottom: 6px; }
         .sun-item .sun-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.35); margin-bottom: 4px; }
         .sun-item .sun-value { font-size: 16px; font-weight: 600; }
 
-        /* --- UV bar --- */
-        .uv-section { margin-top: 20px; }
-        .uv-bar-track {
-            height: 6px;
-            border-radius: 3px;
-            background: linear-gradient(90deg, #2ecc71, #f1c40f, #e67e22, #e74c3c, #8e44ad);
-            position: relative;
-            margin: 10px 0 6px;
-        }
-        .uv-dot {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #fff;
-            border: 2px solid rgba(0,0,0,0.3);
-            position: absolute;
-            top: -4px;
-            transform: translateX(-50%);
-        }
-        .uv-labels { display: flex; justify-content: space-between; font-size: 10px; color: rgba(255,255,255,0.3); }
+        .footer { text-align: center; margin-top: 12px; color: rgba(255,255,255,0.15); font-size: 11px; }
 
-        /* --- Footer --- */
-        .footer {
-            text-align: center;
-            margin-top: 12px;
-            color: rgba(255,255,255,0.15);
-            font-size: 11px;
-        }
-
-        /* --- Responsive --- */
         @media (max-width: 520px) {
             .stats { grid-template-columns: repeat(2, 1fr); }
             .d-extras { display: none; }
             .d-bar-wrap { width: 50px; }
         }
+
+        /* ==================== */
+        /* WEATHER ANIMATIONS   */
+        /* ==================== */
+        #weather-fx {
+            position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden;
+        }
+
+        /* Rain */
+        .raindrop {
+            position: absolute; top: -20px; width: 2px; border-radius: 0 0 2px 2px;
+            background: linear-gradient(to bottom, transparent, rgba(116, 185, 255, 0.5));
+        }
+        @keyframes rain-fall {
+            to { transform: translateY(110vh); }
+        }
+
+        /* Snow */
+        .snowflake {
+            position: absolute; top: -20px; color: rgba(255,255,255,0.7);
+            filter: blur(0.5px);
+        }
+        @keyframes snow-fall {
+            to { transform: translateY(110vh) rotate(360deg); }
+        }
+        @keyframes snow-sway {
+            0%, 100% { margin-left: 0; }
+            50% { margin-left: 30px; }
+        }
+
+        /* Sun glow */
+        .sun-glow {
+            position: absolute; top: -100px; right: -100px;
+            width: 400px; height: 400px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,220,50,0.12), transparent 70%);
+        }
+        @keyframes sun-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.15); opacity: 1; }
+        }
+
+        /* Clouds */
+        .cloud-anim {
+            position: absolute; font-size: 60px; opacity: 0.06;
+        }
+        @keyframes cloud-drift {
+            from { transform: translateX(-120px); }
+            to { transform: translateX(calc(100vw + 120px)); }
+        }
+
+        /* Fog */
+        .fog-band {
+            position: absolute; left: -10%; width: 120%; height: 30%;
+            background: linear-gradient(to right, transparent, rgba(200,200,220,0.06), transparent);
+        }
+        @keyframes fog-slide {
+            0%, 100% { transform: translateX(-5%); }
+            50% { transform: translateX(5%); }
+        }
+
+        /* Lightning */
+        .lightning-flash {
+            position: absolute; inset: 0; background: white; opacity: 0;
+        }
+        @keyframes flash {
+            0%, 100% { opacity: 0; }
+            1% { opacity: 0.7; }
+            2% { opacity: 0; }
+            3% { opacity: 0.4; }
+            4% { opacity: 0; }
+        }
+
+        /* ==================== */
+        /* MUSIC PLAYER         */
+        /* ==================== */
+        #piggy-player {
+            position: fixed; bottom: 20px; right: 20px; z-index: 100;
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(232, 67, 147, 0.2); backdrop-filter: blur(16px);
+            border: 1px solid rgba(232, 67, 147, 0.3); border-radius: 40px;
+            padding: 8px 16px 8px 8px; cursor: pointer; user-select: none;
+            transition: background 0.2s;
+        }
+        #piggy-player:hover { background: rgba(232, 67, 147, 0.3); }
+        #play-btn {
+            width: 36px; height: 36px; border-radius: 50%; border: none;
+            background: #e84393; color: #fff; font-size: 16px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.15s;
+        }
+        #play-btn:hover { transform: scale(1.1); }
+        .song-info { display: flex; flex-direction: column; }
+        .song-name { font-size: 12px; font-weight: 600; color: #fff; }
+        .song-sub { font-size: 10px; color: rgba(255,255,255,0.4); }
+        #vol-slider {
+            width: 60px; height: 4px; -webkit-appearance: none; appearance: none;
+            background: rgba(255,255,255,0.15); border-radius: 2px; outline: none;
+        }
+        #vol-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 12px; height: 12px;
+            border-radius: 50%; background: #fd79a8; cursor: pointer;
+        }
     </style>
 </head>
 <body>
+<div id="weather-fx"></div>
+
 <div class="wrap">
 
     <!-- Top bar with logo + search -->
@@ -266,7 +289,7 @@
                 <div class="stat-value">{{ w.current.cloud_cover }}%</div>
             </div>
             <div class="stat">
-                <div class="stat-icon">🌡️</div>
+                <div class="stat-icon">🔵</div>
                 <div class="stat-label">Pressure</div>
                 <div class="stat-value">{{ w.current.pressure }}</div>
                 <div class="stat-sub">hPa</div>
@@ -337,5 +360,241 @@
     <div class="footer">Weather Piggy — oinking up forecasts since 2025 — Data from Open-Meteo</div>
 
 </div>
+
+<!-- Music player -->
+<div id="piggy-player" title="Click to play some tunes!">
+    <button id="play-btn">&#9654;</button>
+    <div class="song-info">
+        <span class="song-name">The Entertainer</span>
+        <span class="song-sub">8-bit Piggy Mix</span>
+    </div>
+    <input type="range" id="vol-slider" min="0" max="100" value="25" title="Volume">
+</div>
+
+<script>
+// =========================================
+// WEATHER ANIMATIONS
+// =========================================
+(function() {
+    const code = {{ w.current.weather_code }};
+    const fx = document.getElementById('weather-fx');
+
+    function makeRain(count, speed, height) {
+        for (let i = 0; i < count; i++) {
+            const drop = document.createElement('div');
+            drop.className = 'raindrop';
+            drop.style.left = Math.random() * 100 + '%';
+            drop.style.height = height + 'px';
+            drop.style.animation = `rain-fall ${speed + Math.random() * 0.4}s linear infinite`;
+            drop.style.animationDelay = (-Math.random() * speed) + 's';
+            drop.style.opacity = 0.3 + Math.random() * 0.4;
+            fx.appendChild(drop);
+        }
+    }
+
+    function makeSnow(count) {
+        const flakes = ['❄', '❆', '✦', '•'];
+        for (let i = 0; i < count; i++) {
+            const s = document.createElement('div');
+            s.className = 'snowflake';
+            s.textContent = flakes[Math.floor(Math.random() * flakes.length)];
+            s.style.left = Math.random() * 100 + '%';
+            s.style.fontSize = (10 + Math.random() * 16) + 'px';
+            const dur = 5 + Math.random() * 8;
+            s.style.animation = `snow-fall ${dur}s linear infinite, snow-sway ${3 + Math.random()*3}s ease-in-out infinite`;
+            s.style.animationDelay = (-Math.random() * dur) + 's';
+            fx.appendChild(s);
+        }
+    }
+
+    function makeSunGlow() {
+        const g = document.createElement('div');
+        g.className = 'sun-glow';
+        g.style.animation = 'sun-pulse 4s ease-in-out infinite';
+        fx.appendChild(g);
+    }
+
+    function makeClouds(count, opacity) {
+        for (let i = 0; i < count; i++) {
+            const c = document.createElement('div');
+            c.className = 'cloud-anim';
+            c.textContent = '☁️';
+            c.style.top = (5 + Math.random() * 50) + '%';
+            c.style.fontSize = (40 + Math.random() * 60) + 'px';
+            c.style.opacity = opacity;
+            const dur = 25 + Math.random() * 35;
+            c.style.animation = `cloud-drift ${dur}s linear infinite`;
+            c.style.animationDelay = (-Math.random() * dur) + 's';
+            fx.appendChild(c);
+        }
+    }
+
+    function makeFog() {
+        for (let i = 0; i < 4; i++) {
+            const f = document.createElement('div');
+            f.className = 'fog-band';
+            f.style.top = (i * 25 + Math.random() * 10) + '%';
+            const dur = 10 + Math.random() * 8;
+            f.style.animation = `fog-slide ${dur}s ease-in-out infinite`;
+            f.style.animationDelay = (-Math.random() * dur) + 's';
+            fx.appendChild(f);
+        }
+    }
+
+    function makeLightning() {
+        const l = document.createElement('div');
+        l.className = 'lightning-flash';
+        const dur = 5 + Math.random() * 5;
+        l.style.animation = `flash ${dur}s ease-out infinite`;
+        l.style.animationDelay = (Math.random() * 3) + 's';
+        fx.appendChild(l);
+        // Add a second flash for variety
+        const l2 = l.cloneNode();
+        l2.style.animationDuration = (dur + 3) + 's';
+        l2.style.animationDelay = (2 + Math.random() * 4) + 's';
+        fx.appendChild(l2);
+    }
+
+    // Spawn effects based on weather code
+    if (code === 0) {
+        makeSunGlow();
+        makeClouds(3, 0.03);
+    } else if (code <= 3) {
+        makeClouds(code === 3 ? 10 : 6, code === 3 ? 0.08 : 0.05);
+        if (code <= 1) makeSunGlow();
+    } else if (code <= 48) {
+        makeFog();
+        makeClouds(4, 0.04);
+    } else if (code <= 57) {
+        makeRain(40, 1.8, 10);
+        makeClouds(5, 0.05);
+    } else if (code <= 67) {
+        makeRain(code >= 65 ? 120 : 70, code >= 65 ? 0.6 : 1.0, code >= 65 ? 20 : 14);
+        makeClouds(8, 0.07);
+    } else if (code <= 77) {
+        makeSnow(code >= 75 ? 100 : 50);
+        makeClouds(5, 0.05);
+    } else if (code <= 82) {
+        makeRain(code >= 82 ? 100 : 60, 0.8, 16);
+        makeClouds(6, 0.06);
+    } else if (code <= 86) {
+        makeSnow(code >= 86 ? 80 : 40);
+        makeClouds(5, 0.05);
+    } else if (code >= 95) {
+        makeRain(100, 0.6, 20);
+        makeLightning();
+        makeClouds(10, 0.09);
+    }
+})();
+
+// =========================================
+// 8-BIT MUSIC PLAYER: THE ENTERTAINER
+// =========================================
+(function() {
+    const noteFreqs = {
+        'C3':130.81,'D3':146.83,'Eb3':155.56,'E3':164.81,'F3':174.61,'G3':196.00,'A3':220.00,'Bb3':233.08,'B3':246.94,
+        'C4':261.63,'Db4':277.18,'D4':293.66,'Eb4':311.13,'E4':329.63,'F4':349.23,'Gb4':369.99,'G4':392.00,'Ab4':415.30,'A4':440.00,'Bb4':466.16,'B4':493.88,
+        'C5':523.25,'D5':587.33,'Eb5':622.25,'E5':659.25,'F5':698.46,'G5':783.99,'A5':880.00
+    };
+
+    const BPM = 140;
+    const S = 60 / BPM / 4;
+
+    const melody = [
+        ['D4',1],['Eb4',1],
+        ['E4',2],['C5',2],[null,2],['E4',2],
+        ['C5',2],['E4',2],['C5',6],[null,2],
+        ['C4',1],['D4',1],['Eb4',1],['E4',1],['C4',2],['E4',2],
+        ['A4',3],['G4',3],[null,2],
+        ['D4',1],['Eb4',1],
+        ['E4',2],['C5',2],[null,2],['E4',2],
+        ['C5',2],['E4',2],['C5',4],
+        ['C5',1],['D5',1],['Eb5',1],['C5',1],['D5',2],['E5',2],
+        ['C5',2],['D5',2],['C5',6],[null,4],
+        ['D4',1],['Eb4',1],
+        ['E4',2],['C5',2],[null,2],['E4',2],
+        ['C5',2],['E4',2],['C5',6],[null,2],
+        ['C4',1],['D4',1],['Eb4',1],['E4',1],['C4',2],['E4',2],
+        ['A4',3],['G4',3],[null,2],
+        ['D4',1],['Eb4',1],
+        ['E4',2],['C5',2],[null,2],['E4',2],
+        ['C5',2],['D5',2],['E5',2],['D5',2],
+        ['C5',2],['A4',2],['G4',4],[null,4],['C4',4],[null,4],
+    ];
+
+    const bass = [
+        ['C3',4],['G3',4],['C3',4],['G3',4],
+        ['C3',4],['G3',4],['C3',4],['G3',4],
+        ['F3',4],['C3',4],['F3',4],['C3',4],
+        ['G3',4],['G3',4],['G3',4],[null,4],
+        ['C3',4],['G3',4],['C3',4],['G3',4],
+        ['C3',4],['G3',4],['C3',4],['G3',4],
+        ['A3',4],['E3',4],['G3',4],['D3',4],
+        ['C3',4],['G3',4],['C3',8],[null,4],
+        ['C3',4],['G3',4],['C3',4],['G3',4],
+        ['C3',4],['G3',4],['C3',4],['G3',4],
+        ['F3',4],['C3',4],['F3',4],['C3',4],
+        ['G3',4],['G3',4],['G3',4],[null,4],
+        ['C3',4],['G3',4],['C3',4],['G3',4],
+        ['C3',4],['G3',4],['F3',4],['G3',4],
+        ['C3',4],['F3',4],['G3',4],[null,4],['C3',4],[null,4],
+    ];
+
+    let ctx = null, playing = false, masterGain = null;
+    let melodyTimeout = null, bassTimeout = null;
+
+    function scheduleVoice(voice, index, startTime) {
+        if (!playing) return;
+        if (index >= voice.length) index = 0;
+        const [note, dur] = voice[index];
+        const duration = dur * S;
+        if (note && noteFreqs[note]) {
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.value = noteFreqs[note];
+            g.gain.setValueAtTime(0.15, startTime);
+            g.gain.exponentialRampToValueAtTime(0.001, startTime + duration * 0.95);
+            osc.connect(g);
+            g.connect(masterGain);
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+        }
+        const nextTime = startTime + duration;
+        const delay = (nextTime - ctx.currentTime) * 1000;
+        return setTimeout(() => scheduleVoice(voice, index + 1, nextTime), Math.max(0, delay - 50));
+    }
+
+    function start() {
+        if (!ctx) {
+            ctx = new (window.AudioContext || window.webkitAudioContext)();
+            masterGain = ctx.createGain();
+            masterGain.gain.value = volSlider.value / 100 * 0.5;
+            masterGain.connect(ctx.destination);
+        }
+        if (ctx.state === 'suspended') ctx.resume();
+        playing = true;
+        const t = ctx.currentTime + 0.05;
+        melodyTimeout = scheduleVoice(melody, 0, t);
+        bassTimeout = scheduleVoice(bass, 0, t);
+        playBtn.innerHTML = '&#9646;&#9646;';
+    }
+
+    function stop() {
+        playing = false;
+        clearTimeout(melodyTimeout);
+        clearTimeout(bassTimeout);
+        playBtn.innerHTML = '&#9654;';
+    }
+
+    const playBtn = document.getElementById('play-btn');
+    const volSlider = document.getElementById('vol-slider');
+
+    playBtn.addEventListener('click', (e) => { e.stopPropagation(); playing ? stop() : start(); });
+    volSlider.addEventListener('input', () => { if (masterGain) masterGain.gain.value = volSlider.value / 100 * 0.5; });
+    volSlider.addEventListener('click', (e) => e.stopPropagation());
+    document.getElementById('piggy-player').addEventListener('click', () => { playing ? stop() : start(); });
+})();
+</script>
 </body>
 </html>

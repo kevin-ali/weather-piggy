@@ -14,13 +14,25 @@
             align-items: center;
             background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             color: #fff;
+            overflow: hidden;
         }
         .container {
             text-align: center;
             padding: 40px;
+            position: relative;
+            z-index: 2;
         }
         .logo { text-decoration: none; display: inline-block; margin-bottom: 8px; }
-        .logo-pig { font-size: 100px; line-height: 1.1; }
+        .logo-pig {
+            font-size: 100px;
+            line-height: 1.1;
+            animation: piggy-bounce 2s ease-in-out infinite;
+        }
+        @keyframes piggy-bounce {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-8px) rotate(-3deg); }
+            75% { transform: translateY(-4px) rotate(3deg); }
+        }
         h1 { font-size: 42px; font-weight: 700; margin-bottom: 6px; }
         .subtitle { color: rgba(255,255,255,0.6); font-size: 16px; margin-bottom: 8px; }
         .tagline { color: rgba(255,255,255,0.35); font-size: 13px; font-style: italic; margin-bottom: 36px; }
@@ -72,9 +84,88 @@
             color: rgba(255,255,255,0.2);
             font-size: 12px;
         }
+
+        /* --- Ambient clouds --- */
+        #fx-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .cloud-float {
+            position: absolute;
+            font-size: 40px;
+            opacity: 0.08;
+            animation: drift linear infinite;
+        }
+        @keyframes drift {
+            from { transform: translateX(-80px); }
+            to { transform: translateX(calc(100vw + 80px)); }
+        }
+
+        /* --- Music player --- */
+        #piggy-player {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(232, 67, 147, 0.2);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(232, 67, 147, 0.3);
+            border-radius: 40px;
+            padding: 8px 16px 8px 8px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        #piggy-player:hover { background: rgba(232, 67, 147, 0.3); }
+        #play-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: #e84393;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s;
+        }
+        #play-btn:hover { transform: scale(1.1); }
+        .song-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .song-name { font-size: 12px; font-weight: 600; color: #fff; }
+        .song-sub { font-size: 10px; color: rgba(255,255,255,0.4); }
+        #vol-slider {
+            width: 60px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255,255,255,0.15);
+            border-radius: 2px;
+            outline: none;
+        }
+        #vol-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fd79a8;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+    <div id="fx-layer"></div>
+
     <div class="container">
         <a href="/" class="logo"><div class="logo-pig">🐷</div></a>
         <h1>Weather Piggy</h1>
@@ -89,5 +180,156 @@
         {% endif %}
         <div class="footer">Powered by piggy instincts & Open-Meteo</div>
     </div>
+
+    <div id="piggy-player" title="Click to play some tunes!">
+        <button id="play-btn">&#9654;</button>
+        <div class="song-info">
+            <span class="song-name">The Entertainer</span>
+            <span class="song-sub">8-bit Piggy Mix</span>
+        </div>
+        <input type="range" id="vol-slider" min="0" max="100" value="25" title="Volume">
+    </div>
+
+    <script>
+    // --- Ambient floating clouds ---
+    (function() {
+        const fx = document.getElementById('fx-layer');
+        const icons = ['☁️', '🐷', '⭐', '☁️', '☁️'];
+        for (let i = 0; i < 12; i++) {
+            const el = document.createElement('div');
+            el.className = 'cloud-float';
+            el.textContent = icons[i % icons.length];
+            el.style.top = (Math.random() * 90) + '%';
+            el.style.fontSize = (30 + Math.random() * 40) + 'px';
+            el.style.animationDuration = (20 + Math.random() * 30) + 's';
+            el.style.animationDelay = (-Math.random() * 30) + 's';
+            fx.appendChild(el);
+        }
+    })();
+
+    // --- 8-bit Music Player: The Entertainer ---
+    (function() {
+        const noteFreqs = {
+            'C3':130.81,'D3':146.83,'Eb3':155.56,'E3':164.81,'F3':174.61,'G3':196.00,'A3':220.00,'Bb3':233.08,'B3':246.94,
+            'C4':261.63,'Db4':277.18,'D4':293.66,'Eb4':311.13,'E4':329.63,'F4':349.23,'Gb4':369.99,'G4':392.00,'Ab4':415.30,'A4':440.00,'Bb4':466.16,'B4':493.88,
+            'C5':523.25,'D5':587.33,'Eb5':622.25,'E5':659.25,'F5':698.46,'G5':783.99,'A5':880.00
+        };
+
+        const BPM = 140;
+        const S = 60 / BPM / 4;  // 16th note
+
+        // The Entertainer - Section A (melody)
+        const melody = [
+            ['D4',1],['Eb4',1],
+            ['E4',2],['C5',2],[null,2],['E4',2],
+            ['C5',2],['E4',2],['C5',6],[null,2],
+            ['C4',1],['D4',1],['Eb4',1],['E4',1],['C4',2],['E4',2],
+            ['A4',3],['G4',3],[null,2],
+            ['D4',1],['Eb4',1],
+            ['E4',2],['C5',2],[null,2],['E4',2],
+            ['C5',2],['E4',2],['C5',4],
+            ['C5',1],['D5',1],['Eb5',1],['C5',1],['D5',2],['E5',2],
+            ['C5',2],['D5',2],['C5',6],[null,4],
+
+            // Section A repeat with variation
+            ['D4',1],['Eb4',1],
+            ['E4',2],['C5',2],[null,2],['E4',2],
+            ['C5',2],['E4',2],['C5',6],[null,2],
+            ['C4',1],['D4',1],['Eb4',1],['E4',1],['C4',2],['E4',2],
+            ['A4',3],['G4',3],[null,2],
+            ['D4',1],['Eb4',1],
+            ['E4',2],['C5',2],[null,2],['E4',2],
+            ['C5',2],['D5',2],['E5',2],['D5',2],
+            ['C5',2],['A4',2],['G4',4],[null,4],['C4',4],[null,4],
+        ];
+
+        // Simple bass line
+        const bass = [
+            ['C3',4],['G3',4],['C3',4],['G3',4],
+            ['C3',4],['G3',4],['C3',4],['G3',4],
+            ['F3',4],['C3',4],['F3',4],['C3',4],
+            ['G3',4],['G3',4],['G3',4],[null,4],
+            ['C3',4],['G3',4],['C3',4],['G3',4],
+            ['C3',4],['G3',4],['C3',4],['G3',4],
+            ['A3',4],['E3',4],['G3',4],['D3',4],
+            ['C3',4],['G3',4],['C3',8],[null,4],
+
+            ['C3',4],['G3',4],['C3',4],['G3',4],
+            ['C3',4],['G3',4],['C3',4],['G3',4],
+            ['F3',4],['C3',4],['F3',4],['C3',4],
+            ['G3',4],['G3',4],['G3',4],[null,4],
+            ['C3',4],['G3',4],['C3',4],['G3',4],
+            ['C3',4],['G3',4],['F3',4],['G3',4],
+            ['C3',4],['F3',4],['G3',4],[null,4],['C3',4],[null,4],
+        ];
+
+        let ctx = null;
+        let playing = false;
+        let masterGain = null;
+        let melodyTimeout = null;
+        let bassTimeout = null;
+
+        function scheduleVoice(voice, index, startTime) {
+            if (!playing) return;
+            if (index >= voice.length) index = 0;
+            const [note, dur] = voice[index];
+            const duration = dur * S;
+            if (note && noteFreqs[note]) {
+                const osc = ctx.createOscillator();
+                const g = ctx.createGain();
+                osc.type = 'square';
+                osc.frequency.value = noteFreqs[note];
+                g.gain.setValueAtTime(0.15, startTime);
+                g.gain.exponentialRampToValueAtTime(0.001, startTime + duration * 0.95);
+                osc.connect(g);
+                g.connect(masterGain);
+                osc.start(startTime);
+                osc.stop(startTime + duration);
+            }
+            const nextTime = startTime + duration;
+            const delay = (nextTime - ctx.currentTime) * 1000;
+            return setTimeout(() => scheduleVoice(voice, index + 1, nextTime), Math.max(0, delay - 50));
+        }
+
+        function start() {
+            if (!ctx) {
+                ctx = new (window.AudioContext || window.webkitAudioContext)();
+                masterGain = ctx.createGain();
+                masterGain.gain.value = volSlider.value / 100 * 0.5;
+                masterGain.connect(ctx.destination);
+            }
+            if (ctx.state === 'suspended') ctx.resume();
+            playing = true;
+            const t = ctx.currentTime + 0.05;
+            melodyTimeout = scheduleVoice(melody, 0, t);
+            bassTimeout = scheduleVoice(bass, 0, t);
+            playBtn.innerHTML = '&#9646;&#9646;';
+        }
+
+        function stop() {
+            playing = false;
+            clearTimeout(melodyTimeout);
+            clearTimeout(bassTimeout);
+            playBtn.innerHTML = '&#9654;';
+        }
+
+        const playBtn = document.getElementById('play-btn');
+        const volSlider = document.getElementById('vol-slider');
+
+        playBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            playing ? stop() : start();
+        });
+
+        volSlider.addEventListener('input', () => {
+            if (masterGain) masterGain.gain.value = volSlider.value / 100 * 0.5;
+        });
+        volSlider.addEventListener('click', (e) => e.stopPropagation());
+
+        document.getElementById('piggy-player').addEventListener('click', () => {
+            playing ? stop() : start();
+        });
+    })();
+    </script>
 </body>
 </html>
