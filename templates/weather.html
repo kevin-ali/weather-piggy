@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ w.city }} — Weather Piggy</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            padding: 24px 20px 40px;
+        }
+
+        .wrap { max-width: 720px; margin: 0 auto; }
+
+        /* --- Top bar --- */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+        .top-logo {
+            text-decoration: none;
+            font-size: 36px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .top-bar form {
+            flex: 1;
+            display: flex;
+            gap: 0;
+        }
+        .top-bar input {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px 0 0 12px;
+            font-size: 15px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            outline: none;
+        }
+        .top-bar input::placeholder { color: rgba(255,255,255,0.35); }
+        .top-bar input:focus { background: rgba(255,255,255,0.16); }
+        .top-bar button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 0 12px 12px 0;
+            font-size: 15px;
+            font-weight: 600;
+            background: #e84393;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .top-bar button:hover { background: #d63384; }
+
+        /* --- Glass card --- */
+        .card {
+            background: rgba(255,255,255,0.07);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 28px 32px;
+            margin-bottom: 18px;
+        }
+
+        /* --- Current weather --- */
+        .current { text-align: center; }
+        .current .city { font-size: 28px; font-weight: 700; }
+        .current .country { color: rgba(255,255,255,0.45); font-size: 14px; margin-top: 2px; }
+        .current .icon { font-size: 96px; margin: 12px 0 4px; line-height: 1.1; }
+        .current .temp { font-size: 72px; font-weight: 200; letter-spacing: -3px; }
+        .current .temp span { font-size: 36px; vertical-align: super; color: rgba(255,255,255,0.5); }
+        .current .desc { font-size: 18px; color: rgba(255,255,255,0.7); margin-top: 2px; }
+        .piggy-says {
+            margin-top: 12px;
+            padding: 10px 20px;
+            background: rgba(232, 67, 147, 0.15);
+            border: 1px solid rgba(232, 67, 147, 0.25);
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 14px;
+            color: #fd79a8;
+            font-style: italic;
+        }
+        .piggy-says::before { content: "🐷 "; }
+
+        /* --- Stats grid --- */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+        .stat { text-align: center; padding: 8px 0; }
+        .stat-icon { font-size: 20px; margin-bottom: 4px; }
+        .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.35); margin-bottom: 4px; }
+        .stat-value { font-size: 18px; font-weight: 600; }
+        .stat-sub { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+
+        /* --- Section titles --- */
+        .section-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.35);
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        /* --- Hourly --- */
+        .hourly-scroll {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.15) transparent;
+        }
+        .hourly-scroll::-webkit-scrollbar { height: 4px; }
+        .hourly-scroll::-webkit-scrollbar-track { background: transparent; }
+        .hourly-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+        .hour-item {
+            flex: 0 0 72px;
+            text-align: center;
+            padding: 14px 6px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.03);
+        }
+        .hour-item:first-child { background: rgba(232, 67, 147, 0.2); }
+        .hour-item .h-time { font-size: 11px; color: rgba(255,255,255,0.45); margin-bottom: 8px; }
+        .hour-item .h-icon { font-size: 24px; margin-bottom: 6px; }
+        .hour-item .h-temp { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+        .hour-item .h-rain { font-size: 10px; color: #74b9ff; }
+        .hour-item .h-rain.dry { color: rgba(255,255,255,0.2); }
+
+        /* --- Daily --- */
+        .day-row {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .day-row:last-child { border-bottom: none; }
+        .day-row:first-child .d-day { font-weight: 700; color: #fd79a8; }
+        .d-day { width: 52px; font-size: 14px; font-weight: 500; }
+        .d-icon { width: 36px; font-size: 24px; text-align: center; }
+        .d-desc { flex: 1; font-size: 13px; color: rgba(255,255,255,0.45); padding: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .d-extras { display: flex; gap: 12px; margin-right: 16px; }
+        .d-extra { font-size: 11px; color: rgba(255,255,255,0.35); white-space: nowrap; }
+        .d-extra span { color: rgba(255,255,255,0.6); font-weight: 500; }
+        .d-temps { display: flex; gap: 6px; font-size: 14px; white-space: nowrap; align-items: center; }
+        .d-max { font-weight: 600; }
+        .d-min { color: rgba(255,255,255,0.35); }
+        .d-bar-wrap {
+            width: 80px;
+            height: 4px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 3px;
+            position: relative;
+            overflow: hidden;
+        }
+        .d-bar {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #74b9ff, #fd79a8);
+        }
+
+        /* --- Sun card --- */
+        .sun-card {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+        .sun-item .sun-icon { font-size: 32px; margin-bottom: 6px; }
+        .sun-item .sun-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.35); margin-bottom: 4px; }
+        .sun-item .sun-value { font-size: 16px; font-weight: 600; }
+
+        /* --- UV bar --- */
+        .uv-section { margin-top: 20px; }
+        .uv-bar-track {
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #2ecc71, #f1c40f, #e67e22, #e74c3c, #8e44ad);
+            position: relative;
+            margin: 10px 0 6px;
+        }
+        .uv-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #fff;
+            border: 2px solid rgba(0,0,0,0.3);
+            position: absolute;
+            top: -4px;
+            transform: translateX(-50%);
+        }
+        .uv-labels { display: flex; justify-content: space-between; font-size: 10px; color: rgba(255,255,255,0.3); }
+
+        /* --- Footer --- */
+        .footer {
+            text-align: center;
+            margin-top: 12px;
+            color: rgba(255,255,255,0.15);
+            font-size: 11px;
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 520px) {
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .d-extras { display: none; }
+            .d-bar-wrap { width: 50px; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+    <!-- Top bar with logo + search -->
+    <div class="top-bar">
+        <a href="/" class="top-logo" title="Back to Weather Piggy">🐷</a>
+        <form action="/weather" method="POST">
+            <input type="text" name="city" placeholder="Sniff out another city..." required>
+            <button type="submit">Sniff</button>
+        </form>
+    </div>
+
+    <!-- Current conditions -->
+    <div class="card current">
+        <div class="city">{{ w.city }}</div>
+        <div class="country">{{ w.country }}</div>
+        <div class="icon">{{ w.current.icon }}</div>
+        <div class="temp">{{ w.current.temperature }}<span>&deg;C</span></div>
+        <div class="desc">{{ w.current.description }}</div>
+        <div class="piggy-says">{{ w.current.piggy_says }}</div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-icon">🌡️</div>
+                <div class="stat-label">Feels Like</div>
+                <div class="stat-value">{{ w.current.feels_like }}&deg;</div>
+            </div>
+            <div class="stat">
+                <div class="stat-icon">💧</div>
+                <div class="stat-label">Humidity</div>
+                <div class="stat-value">{{ w.current.humidity }}%</div>
+            </div>
+            <div class="stat">
+                <div class="stat-icon">💨</div>
+                <div class="stat-label">Wind</div>
+                <div class="stat-value">{{ w.current.wind_speed }} km/h</div>
+                <div class="stat-sub">Gusts {{ w.current.wind_gusts }} km/h</div>
+            </div>
+            <div class="stat">
+                <div class="stat-icon">☁️</div>
+                <div class="stat-label">Cloud Cover</div>
+                <div class="stat-value">{{ w.current.cloud_cover }}%</div>
+            </div>
+            <div class="stat">
+                <div class="stat-icon">🌡️</div>
+                <div class="stat-label">Pressure</div>
+                <div class="stat-value">{{ w.current.pressure }}</div>
+                <div class="stat-sub">hPa</div>
+            </div>
+            <div class="stat">
+                <div class="stat-icon">☀️</div>
+                <div class="stat-label">UV Index</div>
+                <div class="stat-value">{{ w.current.uv_index }}</div>
+                <div class="stat-sub">{{ w.current.uv_label }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sunrise / Sunset -->
+    <div class="card sun-card">
+        <div class="sun-item">
+            <div class="sun-icon">🌅</div>
+            <div class="sun-label">Sunrise</div>
+            <div class="sun-value">{{ w.current.sunrise }}</div>
+        </div>
+        <div class="sun-item">
+            <div class="sun-icon">🌇</div>
+            <div class="sun-label">Sunset</div>
+            <div class="sun-value">{{ w.current.sunset }}</div>
+        </div>
+    </div>
+
+    <!-- Hourly forecast -->
+    <div class="card">
+        <div class="section-title">Piggy's 24-Hour Forecast</div>
+        <div class="hourly-scroll">
+            {% for h in w.hourly %}
+            <div class="hour-item">
+                <div class="h-time">{% if loop.first %}Now{% else %}{{ h.time }}{% endif %}</div>
+                <div class="h-icon">{{ h.icon }}</div>
+                <div class="h-temp">{{ h.temperature }}&deg;</div>
+                <div class="h-rain {% if h.precip_prob == 0 %}dry{% endif %}">💧 {{ h.precip_prob }}%</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 7-day forecast -->
+    <div class="card">
+        <div class="section-title">The Week Ahead (Piggy's Promise)</div>
+        {% for d in w.daily %}
+        <div class="day-row">
+            <div class="d-day">{% if loop.first %}Today{% else %}{{ d.date }}{% endif %}</div>
+            <div class="d-icon">{{ d.icon }}</div>
+            <div class="d-desc">{{ d.description }}</div>
+            <div class="d-extras">
+                {% if d.precip_sum > 0 %}
+                <div class="d-extra">💧 <span>{{ d.precip_sum }}mm</span></div>
+                {% endif %}
+                <div class="d-extra">UV <span>{{ d.uv_index }}</span></div>
+            </div>
+            <div class="d-temps">
+                <span class="d-min">{{ d.temp_min }}&deg;</span>
+                <div class="d-bar-wrap">
+                    <div class="d-bar" style="left: {{ d.bar_left }}%; width: {{ d.bar_width }}%;"></div>
+                </div>
+                <span class="d-max">{{ d.temp_max }}&deg;</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="footer">Weather Piggy — oinking up forecasts since 2025 — Data from Open-Meteo</div>
+
+</div>
+</body>
+</html>
