@@ -543,6 +543,15 @@
     let ctx = null, playing = false, masterGain = null;
     let melodyTimeout = null, bassTimeout = null;
 
+    // iOS/mobile requires a silent buffer play to unlock audio
+    function unlockAudio() {
+        const buffer = ctx.createBuffer(1, 1, 22050);
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        source.connect(ctx.destination);
+        source.start(0);
+    }
+
     function scheduleVoice(voice, index, startTime) {
         if (!playing) return;
         if (index >= voice.length) index = 0;
@@ -553,8 +562,9 @@
             const g = ctx.createGain();
             osc.type = 'square';
             osc.frequency.value = noteFreqs[note];
-            g.gain.setValueAtTime(0.15, startTime);
-            g.gain.exponentialRampToValueAtTime(0.001, startTime + duration * 0.95);
+            const vol = 0.15;
+            g.gain.setValueAtTime(vol, startTime);
+            g.gain.linearRampToValueAtTime(0.0, startTime + duration * 0.9);
             osc.connect(g);
             g.connect(masterGain);
             osc.start(startTime);
@@ -565,16 +575,20 @@
         return setTimeout(() => scheduleVoice(voice, index + 1, nextTime), Math.max(0, delay - 50));
     }
 
-    function start() {
+    async function start() {
         if (!ctx) {
             ctx = new (window.AudioContext || window.webkitAudioContext)();
             masterGain = ctx.createGain();
             masterGain.gain.value = volSlider.value / 100 * 0.5;
             masterGain.connect(ctx.destination);
+            unlockAudio();
         }
-        if (ctx.state === 'suspended') ctx.resume();
+        // Must await resume — mobile browsers block audio until this resolves
+        if (ctx.state === 'suspended') {
+            await ctx.resume();
+        }
         playing = true;
-        const t = ctx.currentTime + 0.05;
+        const t = ctx.currentTime + 0.1;
         melodyTimeout = scheduleVoice(melody, 0, t);
         bassTimeout = scheduleVoice(bass, 0, t);
         playBtn.innerHTML = '&#9646;&#9646;';
@@ -587,13 +601,25 @@
         playBtn.innerHTML = '&#9654;';
     }
 
+    function toggle(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        playing ? stop() : start();
+    }
+
     const playBtn = document.getElementById('play-btn');
     const volSlider = document.getElementById('vol-slider');
+    const player = document.getElementById('piggy-player');
 
-    playBtn.addEventListener('click', (e) => { e.stopPropagation(); playing ? stop() : start(); });
+    // Both click and touchend for mobile compatibility
+    playBtn.addEventListener('click', toggle);
+    playBtn.addEventListener('touchend', toggle);
+    player.addEventListener('click', toggle);
+    player.addEventListener('touchend', toggle);
+
     volSlider.addEventListener('input', () => { if (masterGain) masterGain.gain.value = volSlider.value / 100 * 0.5; });
     volSlider.addEventListener('click', (e) => e.stopPropagation());
-    document.getElementById('piggy-player').addEventListener('click', () => { playing ? stop() : start(); });
+    volSlider.addEventListener('touchend', (e) => e.stopPropagation());
 })();
 </script>
 </body>
