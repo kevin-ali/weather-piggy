@@ -268,15 +268,7 @@
         let masterGain = null;
         let melodyTimeout = null;
         let bassTimeout = null;
-
-        // iOS/mobile requires a silent buffer play to unlock audio
-        function unlockAudio() {
-            const buffer = ctx.createBuffer(1, 1, 22050);
-            const source = ctx.createBufferSource();
-            source.buffer = buffer;
-            source.connect(ctx.destination);
-            source.start(0);
-        }
+        let toggling = false;
 
         function scheduleVoice(voice, index, startTime) {
             if (!playing) return;
@@ -288,8 +280,7 @@
                 const g = ctx.createGain();
                 osc.type = 'square';
                 osc.frequency.value = noteFreqs[note];
-                const vol = 0.15;
-                g.gain.setValueAtTime(vol, startTime);
+                g.gain.setValueAtTime(0.15, startTime);
                 g.gain.linearRampToValueAtTime(0.0, startTime + duration * 0.9);
                 osc.connect(g);
                 g.connect(masterGain);
@@ -301,23 +292,35 @@
             return setTimeout(() => scheduleVoice(voice, index + 1, nextTime), Math.max(0, delay - 50));
         }
 
-        async function start() {
-            if (!ctx) {
-                ctx = new (window.AudioContext || window.webkitAudioContext)();
-                masterGain = ctx.createGain();
-                masterGain.gain.value = volSlider.value / 100 * 0.5;
-                masterGain.connect(ctx.destination);
-                unlockAudio();
-            }
-            // Must await resume — mobile browsers block audio until this resolves
-            if (ctx.state === 'suspended') {
-                await ctx.resume();
-            }
+        function beginPlayback() {
             playing = true;
             const t = ctx.currentTime + 0.1;
             melodyTimeout = scheduleVoice(melody, 0, t);
             bassTimeout = scheduleVoice(bass, 0, t);
             playBtn.innerHTML = '&#9646;&#9646;';
+        }
+
+        function start() {
+            if (!ctx) {
+                ctx = new (window.AudioContext || window.webkitAudioContext)();
+                masterGain = ctx.createGain();
+                masterGain.gain.value = volSlider.value / 100 * 0.5;
+                masterGain.connect(ctx.destination);
+            }
+            // Synchronous oscillator play in gesture handler to force-unlock iOS audio
+            var unlock = ctx.createOscillator();
+            var unlockGain = ctx.createGain();
+            unlockGain.gain.value = 0.001;
+            unlock.connect(unlockGain);
+            unlockGain.connect(ctx.destination);
+            unlock.start();
+            unlock.stop(ctx.currentTime + 0.001);
+
+            if (ctx.state === 'suspended') {
+                ctx.resume().then(beginPlayback);
+            } else {
+                beginPlayback();
+            }
         }
 
         function stop() {
@@ -330,6 +333,10 @@
         function toggle(e) {
             e.preventDefault();
             e.stopPropagation();
+            // Debounce to prevent touchend + click double-firing
+            if (toggling) return;
+            toggling = true;
+            setTimeout(function() { toggling = false; }, 300);
             playing ? stop() : start();
         }
 
@@ -337,17 +344,16 @@
         const volSlider = document.getElementById('vol-slider');
         const player = document.getElementById('piggy-player');
 
-        // Both click and touchend for mobile compatibility
         playBtn.addEventListener('click', toggle);
         playBtn.addEventListener('touchend', toggle);
         player.addEventListener('click', toggle);
         player.addEventListener('touchend', toggle);
 
-        volSlider.addEventListener('input', () => {
+        volSlider.addEventListener('input', function() {
             if (masterGain) masterGain.gain.value = volSlider.value / 100 * 0.5;
         });
-        volSlider.addEventListener('click', (e) => e.stopPropagation());
-        volSlider.addEventListener('touchend', (e) => e.stopPropagation());
+        volSlider.addEventListener('click', function(e) { e.stopPropagation(); });
+        volSlider.addEventListener('touchend', function(e) { e.stopPropagation(); });
     })();
     </script>
 </body>
